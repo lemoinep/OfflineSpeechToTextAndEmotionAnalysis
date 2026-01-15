@@ -2,6 +2,11 @@
 
 ## *Descriptions*
 
+<p align="center">
+<img src="Images/P0001.jpg" width="75%" />
+</p>
+
+
 This Python project provides a complete offline speech-to-text and emotion analysis pipeline.
 It converts WAV audio files into structured text formats (TXT, JSON, DOCX) using the Vosk speech recognition engine, 
 enhanced by silence-based segmentation for natural line breaks. The transcription is then refined with automatic punctuation restoration and sentence capitalization for better readability.
