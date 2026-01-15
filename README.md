@@ -13,7 +13,3 @@ This tool can be used for offline meeting transcription, podcast or interview an
 
 ## I will add other tools in the future...
 
-
-
- 
-"# OfflineSpeechToTextAndEmotionAnalysis" 
