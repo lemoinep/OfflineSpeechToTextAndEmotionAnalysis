@@ -8,7 +8,7 @@
 
 
 This Python project provides a complete offline speech-to-text and emotion analysis pipeline.
-It converts WAV audio files into structured text formats (TXT, JSON, DOCX) using the Vosk speech recognition engine, 
+It converts MP4 movies and WAV audio files into structured text formats (TXT, JSON, DOCX) using the Vosk speech recognition engine, 
 enhanced by silence-based segmentation for natural line breaks. The transcription is then refined with automatic punctuation restoration and sentence capitalization for better readability.
 
 In addition, the program performs emotion detection and sentiment analysis using NRCLex, generating detailed emotion reports (CSV, graphs, and color-coded DOCX documents)
@@ -18,3 +18,4 @@ This tool can be used for offline meeting transcription, podcast or interview an
 
 ## I will add other tools in the future...
 
+For now we have the graphs, so I will add a kind of debriefing in the form of text later to interpret the results...
