@@ -14,6 +14,11 @@ enhanced by silence-based segmentation for natural line breaks. The transcriptio
 In addition, the program performs emotion detection and sentiment analysis using NRCLex, generating detailed emotion reports (CSV, graphs, and color-coded DOCX documents)
 that visually represent the emotional tone of the transcript.
 
+<p align="center">
+<img src="Images/M1_Pie_Report.jpg" width="50%" />
+</p>
+
+
 This tool can be used for offline meeting transcription, podcast or interview analysis, and emotional insight extraction without requiring internet connectivity.
 
 ## I will add other tools in the future...
