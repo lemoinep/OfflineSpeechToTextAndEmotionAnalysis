@@ -6,6 +6,7 @@
 # - Restoration punctuation
 # - Majuscules at the beginning of sentence / paragraph
 # - Emotional analysis + colored DOCX
+# - Emotional debriefing 
 
 import os
 import sys
@@ -602,6 +603,205 @@ def transcribe(
     )
 
 
+def summarize_emotions_report_clinical(report_csv_path, summary_txt_path, top_k=3):
+    if not os.path.isfile(report_csv_path):
+        print(f"[WARN] Report CSV not found: {report_csv_path}")
+        return
+
+    df = pd.read_csv(report_csv_path)  # colonnes: Emotions, Frequencies
+    if df.empty or "Emotions" not in df.columns or "Frequencies" not in df.columns:
+        print(f"[WARN] Invalid report CSV format: {report_csv_path}")
+        return
+
+    df = df.copy()
+    df["Frequencies"] = df["Frequencies"].astype(float)
+    total = df["Frequencies"].sum()
+    if total > 0:
+        df["NormFreq"] = df["Frequencies"] / total
+    else:
+        df["NormFreq"] = df["Frequencies"]
+
+    df_sorted = df.sort_values("NormFreq", ascending=False)
+    top = df_sorted.head(top_k)
+
+    core_negative = ["fear", "anger", "sadness", "disgust"]
+    core_positive = ["joy", "trust"]
+    broad_positive = ["joy", "trust", "positive", "anticip"]
+    broad_negative = ["fear", "anger", "sadness", "disgust", "negative"]
+
+    pos_score = df[df["Emotions"].isin(broad_positive)]["NormFreq"].sum()
+    neg_score = df[df["Emotions"].isin(broad_negative)]["NormFreq"].sum()
+    neutral_score = max(0.0, 1.0 - (pos_score + neg_score))
+
+    if pos_score > neg_score + 0.1:
+        global_tone = "predominantly positive"
+    elif neg_score > pos_score + 0.1:
+        global_tone = "predominantly negative"
+    else:
+        global_tone = "clinically mixed or ambivalent"
+
+    lines = []
+    lines.append("Clinical-oriented interpretation of emotional content\n")
+    lines.append(
+        f"From a global perspective, the affective tone of the transcript appears "
+        f"**{global_tone}**.\n"
+    )
+    lines.append(
+        f"Approximate distribution of broad affective valence:\n"
+        f"- Positive-related emotions: ~{pos_score*100:.1f}% of the emotional content.\n"
+        f"- Negative-related emotions: ~{neg_score*100:.1f}%.\n"
+        f"- Residual / neutral or non-specific content: ~{neutral_score*100:.1f}%.\n"
+    )
+
+    lines.append("\nMost salient emotions (lexical level):")
+    for _, row in top.iterrows():
+        emo = row["Emotions"]
+        pct = row["NormFreq"] * 100
+        lines.append(f"- {emo.capitalize()}: around {pct:.1f}% of the detected emotion markers.")
+
+    lines.append("\nClinical considerations (to be interpreted with caution):")
+
+    fear_level = df[df["Emotions"] == "fear"]["NormFreq"].sum()
+    anger_level = df[df["Emotions"] == "anger"]["NormFreq"].sum()
+    sadness_level = df[df["Emotions"] == "sadness"]["NormFreq"].sum()
+    disgust_level = df[df["Emotions"] == "disgust"]["NormFreq"].sum()
+    joy_level = df[df["Emotions"] == "joy"]["NormFreq"].sum()
+    trust_level = df[df["Emotions"] == "trust"]["NormFreq"].sum()
+
+    if fear_level > 0.1:
+        lines.append(
+            "- A marked presence of **fear-related** terms may reflect anxiety, "
+            "perceived threat, or anticipatory worries in the discourse."
+        )
+    if anger_level > 0.1:
+        lines.append(
+            "- Elevated **anger-related** markers can indicate frustration, irritability, "
+            "or conflictual themes."
+        )
+    if sadness_level > 0.1:
+        lines.append(
+            "- A notable level of **sadness-related** vocabulary may suggest experiences "
+            "of loss, hopelessness, or emotional withdrawal."
+        )
+    if disgust_level > 0.1:
+        lines.append(
+            "- **Disgust-related** content can reflect rejection, moral discomfort, "
+            "or strong aversive reactions."
+        )
+    if joy_level > 0.1 or trust_level > 0.1:
+        lines.append(
+            "- The presence of **joy** and **trust** suggests that the person also "
+            "refers to positive experiences, supportive relationships, or moments of relief."
+        )
+
+    if neg_score > pos_score and (fear_level + sadness_level) > 0.2:
+        lines.append(
+            "- Overall, the negative emotional load is relatively high, with a focus on "
+            "fear/sadness. In a clinical context, such a pattern might warrant further "
+            "exploration of anxiety or depressive symptoms."
+        )
+    elif pos_score >= neg_score:
+        lines.append(
+            "- Despite the presence of negative affects, the balance of emotions does not "
+            "suggest a uniformly depressed or hostile tone."
+        )
+
+    lines.append(
+        "\nImportant: this interpretation is fully automated and based only on lexical "
+        "emotion frequencies (NRC lexicon). It cannot replace a comprehensive clinical "
+        "assessment by a qualified professional."
+    )
+
+    with open(summary_txt_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+    print(f"[INFO] Clinical emotion summary written to {summary_txt_path}")
+
+
+def summarize_emotions_report(report_csv_path, summary_txt_path, top_k=3):
+    if not os.path.isfile(report_csv_path):
+        print(f"[WARN] Report CSV not found: {report_csv_path}")
+        return
+
+    df = pd.read_csv(report_csv_path)  
+    if df.empty or "Emotions" not in df.columns or "Frequencies" not in df.columns:
+        print(f"[WARN] Invalid report CSV format: {report_csv_path}")
+        return
+
+    df = df.copy()
+    df["Frequencies"] = df["Frequencies"].astype(float)
+    total = df["Frequencies"].sum()
+    if total > 0:
+        df["NormFreq"] = df["Frequencies"] / total
+    else:
+        df["NormFreq"] = df["Frequencies"]
+
+    df_sorted = df.sort_values("NormFreq", ascending=False)
+    top = df_sorted.head(top_k)
+
+    pos_emotions = ["joy", "trust", "positive", "anticip"]
+    neg_emotions = ["fear", "anger", "sadness", "disgust", "negative"]
+
+    pos_score = df[df["Emotions"].isin(pos_emotions)]["NormFreq"].sum()
+    neg_score = df[df["Emotions"].isin(neg_emotions)]["NormFreq"].sum()
+
+    if pos_score > neg_score + 0.05:
+        global_tone = "overall positive"
+    elif neg_score > pos_score + 0.05:
+        global_tone = "overall negative"
+    else:
+        global_tone = "rather mixed or balanced"
+
+    lines = []
+    lines.append("Automatic interpretation of emotion analysis\n")
+    lines.append(f"- The emotional tone of the text appears **{global_tone}**.\n")
+    lines.append(
+        f"- Approximate distribution: positive-related emotions ≈ {pos_score*100:.1f}%, "
+        f"negative-related emotions ≈ {neg_score*100:.1f}%.\n"
+    )
+
+    lines.append("- Most prominent emotions detected:")
+    for _, row in top.iterrows():
+        emo = row["Emotions"]
+        pct = row["NormFreq"] * 100
+        lines.append(f"  - {emo.capitalize()}: about {pct:.1f}% of the emotional content.")
+
+    lines.append("\nInterpretation (high-level, automatic):")
+    if "fear" in df["Emotions"].values or "anger" in df["Emotions"].values:
+        if df[df["Emotions"] == "fear"]["NormFreq"].sum() > 0.1:
+            lines.append(
+                "- The presence of **fear** suggests that the text may contain concerns, "
+                "anxiety, or references to perceived threats."
+            )
+        if df[df["Emotions"] == "anger"]["NormFreq"].sum() > 0.1:
+            lines.append(
+                "- A noticeable amount of **anger** indicates frustration, disagreement, "
+                "or conflict in the discourse."
+            )
+
+    if df[df["Emotions"] == "joy"]["NormFreq"].sum() > 0.1:
+        lines.append(
+            "- The level of **joy** indicates several positive or satisfying elements "
+            "in the text."
+        )
+
+    if df[df["Emotions"] == "sadness"]["NormFreq"].sum() > 0.1:
+        lines.append(
+            "- The detected **sadness** may reflect loss, disappointment, or negative events."
+        )
+
+    lines.append(
+        "\nNote: this summary is generated automatically from lexical emotion frequencies "
+        "and should be interpreted with caution."
+    )
+
+    with open(summary_txt_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+    print(f"[INFO] Emotion summary written to {summary_txt_path}")
+
+
+
 
 if __name__ == "__main__":
 
@@ -684,18 +884,16 @@ if __name__ == "__main__":
     MODEL_PATH = os.path.join(PathW, "Models", args.Model)
 
     input_file = os.path.join(args.Path, args.Name)
-    base_name, ext = os.path.splitext(os.path.basename(args.Name))  # ext = .wav / .mp3 / .mp4...[web:4]
+    base_name, ext = os.path.splitext(os.path.basename(args.Name))  
 
     final_wav = input_file
 
     if ext.lower() in [".mp4", ".mp3"]:
         final_wav = os.path.join(args.Path, f"{base_name}.wav")
-
-        # Commande ffmpeg
         cmd = [
             "ffmpeg",
-            "-y",              # overwrite
-            "-i", input_file,  # input
+            "-y",              
+            "-i", input_file,  
             "-vn",             
             "-ac", "1",        # mono
             "-ar", "16000",    # 16 kHz
@@ -721,7 +919,7 @@ if __name__ == "__main__":
     OutputTxt = os.path.join(output_dir, f"{base_name}.txt")
     OutputTxtSpeakers = os.path.join(output_dir, f"{base_name}_speakers.txt")
     OutputDocx = os.path.join(output_dir, f"{base_name}.docx")
-
+    
     use_punct = not args.no_punct
     
     if qtranscribe :
@@ -741,5 +939,14 @@ if __name__ == "__main__":
 
     if args.emotions_analysis:
         analyze_text_file(OutputTxt, qview=False)
+        repport_path = os.path.join(output_dir, f"{base_name}_Report.csv")
+        
+        summary_path = os.path.join(output_dir, f"{base_name}_Report_Summary.txt")
+        summarize_emotions_report(repport_path, summary_path)        
+
+        summary_path = os.path.join(output_dir, f"{base_name}_Report_Summary_Clinical.txt")
+        summarize_emotions_report_clinical(repport_path, summary_path)
+        
+
 
     print("\n--- Finished ---")
