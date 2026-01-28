@@ -33,6 +33,7 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt
 
 
+
 SetLogLevel(-1)
 
 EMOTION_SIGNS = {
@@ -888,7 +889,7 @@ if __name__ == "__main__":
 
     final_wav = input_file
 
-    if ext.lower() in [".mp4", ".mp3"]:
+    if ext.lower() in [".mp4", ".mp3",".webm"]:
         final_wav = os.path.join(args.Path, f"{base_name}.wav")
         cmd = [
             "ffmpeg",
