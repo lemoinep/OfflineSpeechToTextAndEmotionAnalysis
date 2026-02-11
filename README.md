@@ -1,5 +1,12 @@
 # *Offline Speech-to-Text and Emotion Analysis*
 
+[![Version](https://img.shields.io/badge/version-1.5-green.svg)](https://github.com/lemoinep/OfflineSpeechToTextAndEmotionAnalysis)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
+
+---
+
+
 ## *Descriptions*
 
 <p align="center">
@@ -170,3 +177,13 @@ This tool can be used for offline meeting transcription, podcast or interview an
 ## I will add other tools in the future...
 
 For now we have the graphs, so I will add a kind of debriefing in the form of text later to interpret the results...
+
+---
+
+## 📝 **Author**
+
+**Dr. Patrick Lemoine**  
+*Engineer Expert in Scientific Computing*  
+[LinkedIn](https://www.linkedin.com/in/patrick-lemoine-7ba11b72/)
+
+---
