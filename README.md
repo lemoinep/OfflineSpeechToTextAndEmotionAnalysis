@@ -155,6 +155,7 @@ This tool can be used for offline meeting transcription, podcast or interview an
 
 ## For more information
 
+<p align="center">
 <img src="Images/Z20260204_000001.jpg" width="100%" />
 <img src="Images/Z20260204_000002.jpg" width="100%" />
 <img src="Images/Z20260204_000003.jpg" width="100%" />
@@ -170,6 +171,7 @@ This tool can be used for offline meeting transcription, podcast or interview an
 <img src="Images/Z20260204_000013.jpg" width="100%" />
 <img src="Images/Z20260204_000014.jpg" width="100%" />
 <img src="Images/Z20260204_000015.jpg" width="100%" />
+</p>
 
 ---
 
