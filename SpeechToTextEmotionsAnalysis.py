@@ -544,7 +544,11 @@ def transcribe(
 
     if use_punctuation and text_with_linebreaks:
         print("\nRestoring punctuation...")
-        punct_model = PunctuationModel()
+
+        if os.path.exists(MODEL_PATH_PUNCTUATION):
+            punct_model = PunctuationModel(model=MODEL_PATH_PUNCTUATION)
+        else :
+            punct_model = PunctuationModel()
 
         lines = text_with_linebreaks.split("\n")
         new_lines = []
@@ -832,6 +836,14 @@ if __name__ == "__main__":
         default="vosk-model-small-en-us-0.15",
         help="Path to Vosk model directory (relative to ./Models).",
     )
+    
+    parser.add_argument(
+        "-p",
+        "--ModelPunctuation",
+        type=str,
+        default="fullstop-punctuation-multilang-large",
+        help="Path to model ponctuation directory.",
+    )
 
     parser.add_argument(
         "-c",
@@ -883,6 +895,7 @@ if __name__ == "__main__":
 
     PathW = os.path.dirname(sys.argv[0])
     MODEL_PATH = os.path.join(PathW, "Models", args.Model)
+    MODEL_PATH_PUNCTUATION = os.path.join(PathW, "ModelsPunctuation", args.ModelPunctuation)
 
     input_file = os.path.join(args.Path, args.Name)
     base_name, ext = os.path.splitext(os.path.basename(args.Name))  
